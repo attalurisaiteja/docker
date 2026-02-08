@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout(true)
-    }
-
     environment {
         DOCKER_IMAGE = "atalurisaiteja/devops"
         DOCKER_TAG   = "latest"
