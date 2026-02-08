@@ -8,17 +8,11 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/attalurisaiteja/docker.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
+                sh '''
+                  docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                '''
             }
         }
 
@@ -29,31 +23,32 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh '''
+                      echo "$DOCKER_PASS" | docker login \
+                      -u "$DOCKER_USER" --password-stdin
+                    '''
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                }
+                sh '''
+                  docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                '''
             }
         }
     }
 
     post {
-        always {
-            sh 'docker logout'
-        }
         success {
             echo 'Docker image built and pushed successfully 🎉'
+        }
+        always {
+            sh 'docker logout || true'
         }
         failure {
             echo 'Pipeline failed ❌'
         }
     }
 }
-
-
