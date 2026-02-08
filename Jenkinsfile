@@ -1,12 +1,23 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
         DOCKER_IMAGE = "atalurisaiteja/devops"
         DOCKER_TAG   = "latest"
     }
 
     stages {
+
+        stage('Checkout SCM') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/attalurisaiteja/docker.git'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
