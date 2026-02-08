@@ -2,87 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Scenario: Jenkins Pipeline for Docker Hub</title>
+    <title>Jenkins Docker Pipeline</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f4f4f4;
-            padding: 20px;
-            line-height: 1.6;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: #020617;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         h1 {
-            color: #2c3e50;
+            color: #38bdf8;
         }
-        h2 {
-            color: #34495e;
+        p {
+            font-size: 1.1rem;
         }
-        pre {
-            background: #272822;
-            color: #f8f8f2;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-        }
-        code {
-            font-family: Consolas, monospace;
-        }
-        .scenario {
-            background: #ecf0f1;
-            padding: 15px;
-            border-left: 5px solid #3498db;
-            margin-bottom: 20px;
+        footer {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
     </style>
 </head>
 <body>
-    <h1>Scenario: Jenkins Pipeline for Docker Hub</h1>
-    
-    <div class="scenario">
-        <h2>Scenario Description</h2>
-        <p>
-            Your DevOps team needs to automate the process of building and deploying a Dockerized web application. 
-            Jenkins should be used to build the Docker image from the source code repository and then push the image 
-            to Docker Hub. The pipeline must ensure secure authentication using Jenkins credentials and should be 
-            reusable for future projects.
-        </p>
-    </div>
 
-    <h2>Jenkins Pipeline Code</h2>
-    <pre><code>
-pipeline {
-    agent any
+<div class="container">
+    <h1>🚀 Jenkins + Docker</h1>
+    <p>Docker image built and pushed to Docker Hub successfully!</p>
+    <p>This app was deployed using a Jenkins Pipeline.</p>
+    <footer>
+        <p>CI/CD in action 🔥</p>
+    </footer>
+</div>
 
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials') 
-        IMAGE_NAME = "your-dockerhub-username/your-image-name"
-        IMAGE_TAG = "latest"
-    }
-
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                }
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    sh "echo ${DOCKER_HUB_CREDENTIALS_PSW} | docker login -u ${DOCKER_HUB_CREDENTIALS_USR} --password-stdin"
-                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-                }
-            }
-        }
-    }
-}
-    </code></pre>
 </body>
 </html>
