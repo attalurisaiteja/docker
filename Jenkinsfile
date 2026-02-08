@@ -3,22 +3,22 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "atalurisaiteja/devops"
-        DOCKER_TAG   = "1.0.${BUILD_NUMBER}"
+        DOCKER_TAG   = "latest"
     }
 
     stages {
 
-        stage('Checkout SCM') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                git 'https://github.com/attalurisaiteja/docker.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh '''
-                  docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-                '''
+                script {
+                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
+                }
             }
         }
 
@@ -29,35 +29,31 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh '''
-                      echo "$DOCKER_PASS" | docker login \
-                      -u "$DOCKER_USER" --password-stdin
-                    '''
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                sh '''
-                  docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-                  docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
-                  docker push ${DOCKER_IMAGE}:latest
-                '''
+                script {
+                    docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
+                }
             }
         }
     }
 
     post {
-        success {
-            echo "Docker image built and pushed successfully 🚀"
-        }
-
         always {
-            sh '''
-              docker logout || true
-              docker image prune -f || true
-            '''
+            sh 'docker logout'
+        }
+        success {
+            echo 'Docker image built and pushed successfully 🎉'
+        }
+        failure {
+            echo 'Pipeline failed ❌'
         }
     }
 }
+
+
