@@ -8,7 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
@@ -16,13 +16,13 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
+                sh '''
+                  docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+                '''
             }
         }
 
-        stage('Docker Hub Login') {
+        stage('Login to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
@@ -30,29 +30,34 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh '''
-                        echo "$DOCKER_PASS" | docker login \
-                        -u "$DOCKER_USER" --password-stdin
+                      echo "$DOCKER_PASS" | docker login \
+                      -u "$DOCKER_USER" --password-stdin
                     '''
                 }
             }
         }
 
-        stage('Push Image to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
-                script {
-                    docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                    docker.image("${DOCKER_IMAGE}:${DOCKER_TAG}").push('latest')
-                }
+                sh '''
+                  docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                  docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
+                  docker push ${DOCKER_IMAGE}:latest
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "Docker image pushed successfully: ${DOCKER_IMAGE}:${DOCKER_TAG}"
+            echo "Docker image built and pushed successfully 🚀"
         }
-        cleanup {
-            sh "docker image prune -f"
+
+        always {
+            sh '''
+              docker logout || true
+              docker image prune -f || true
+            '''
         }
     }
 }
